@@ -77,7 +77,7 @@ func collectProjectDetails(cfg *config.ProjectConfig) error {
 			Prompt: &survey.Select{
 				Message: "Select project type:",
 				Options: config.ProjectTypes(),
-				Default: "basic",
+				Default: "cli",
 			},
 		},
 		{
@@ -85,7 +85,7 @@ func collectProjectDetails(cfg *config.ProjectConfig) error {
 			Prompt: &survey.Select{
 				Message: "Select project structure:",
 				Options: config.ProjectStructures(),
-				Default: "src",
+				Default: "direct",
 			},
 		},
 	}

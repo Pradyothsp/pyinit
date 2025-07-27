@@ -17,7 +17,7 @@ type ProjectConfig struct {
 
 // ProjectTypes returns available project types
 func ProjectTypes() []string {
-	return []string{"basic", "web", "library", "data-science"}
+	return []string{"cli", "web", "library", "data-science"}
 }
 
 // ProjectStructures returns available project structures
