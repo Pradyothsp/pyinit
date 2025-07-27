@@ -131,5 +131,10 @@ func (g *Generator) createMainDirectory(cfg *config.ProjectConfig) error {
 		return fmt.Errorf("failed to create __init__.py in main project directory: %w", err)
 	}
 
+	// Generate main.py
+	if err := g.generateFileFromTemplate(cfg, "main.py.j2", filepath.Join(cfg.MainDirName, "main.py")); err != nil {
+		return fmt.Errorf("failed to generate main.py: %w", err)
+	}
+
 	return nil
 }
