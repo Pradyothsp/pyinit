@@ -3,7 +3,7 @@ name = "{{ project_name }}"
 version = "0.1.0"
 description = ""
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">={{ python_version }}"
 authors = [{ name = "{{ user_name }}", email = "{{ email }}" }]
 dependencies = []
 
@@ -24,7 +24,7 @@ packages = ["{{ main_dir_name }}", "scripts"]
 include = ["{{ main_dir_name }}", "scripts"]
 venvPath = "."
 venv = ".venv"
-pythonVersion = "3.13"
+pythonVersion = "{{ python_version }}"
 typeCheckingMode = "strict"
 reportMissingImports = true
 reportMissingTypeStubs = false

@@ -48,6 +48,11 @@ func (g *Generator) GenerateProject(cfg *config.ProjectConfig) error {
 		return fmt.Errorf("failed to create main project directory: %w", err)
 	}
 
+	// Generate .python-version
+	if err := g.generateFileFromTemplate(cfg, ".python-version.j2", ".python-version"); err != nil {
+		return fmt.Errorf("failed to generate .python-version: %w", err)
+	}
+
 	// Create pyproject.toml
 	if err := g.generateFileFromTemplate(cfg, "pyproject.toml.j2", "pyproject.toml"); err != nil {
 		return fmt.Errorf("failed to generate pyproject.toml: %w", err)

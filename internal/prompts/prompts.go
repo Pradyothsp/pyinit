@@ -36,6 +36,11 @@ func CollectProjectInfo() (*config.ProjectConfig, error) {
 		return nil, fmt.Errorf("failed to set main directory name: %w", err)
 	}
 
+	// Ask Python version
+	if err := askForPythonVersion(cfg); err != nil {
+		return nil, fmt.Errorf("failed to get Python version: %w", err)
+	}
+
 	return cfg, nil
 }
 
@@ -186,6 +191,23 @@ func askForCustomPath(cfg *config.ProjectConfig) error {
 	// Create the full project path by combining custom directory + project name
 	projectDir := config.SanitizeProjectName(cfg.ProjectName)
 	cfg.ProjectPath = filepath.Join(customDir, projectDir)
+
+	return nil
+}
+
+func askForPythonVersion(cfg *config.ProjectConfig) error {
+	// Ask for the Python version
+	var pythonVersion string
+	prompt := &survey.Input{
+		Message: "Enter Python version (default is 3.13):",
+		Default: "3.13",
+	}
+
+	if err := survey.AskOne(prompt, &pythonVersion); err != nil {
+		return fmt.Errorf("failed to get Python version: %w", err)
+	}
+
+	cfg.PythonVersion = pythonVersion
 
 	return nil
 }
