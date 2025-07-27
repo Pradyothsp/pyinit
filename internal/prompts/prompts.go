@@ -66,7 +66,7 @@ func collectProjectDetails(cfg *config.ProjectConfig) error {
 			Prompt: &survey.Select{
 				Message: "Select project type:",
 				Options: config.ProjectTypes(),
-				Default: "cli",
+				Default: "basic",
 			},
 		},
 		{
