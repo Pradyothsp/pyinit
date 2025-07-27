@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	_ "github.com/Pradyothsp/pyinit/internal/config"
 	"github.com/Pradyothsp/pyinit/internal/generator"
 	"github.com/Pradyothsp/pyinit/internal/prompts"
 	"github.com/spf13/cobra"

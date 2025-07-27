@@ -93,12 +93,20 @@ func collectProjectDetails(cfg *config.ProjectConfig) error {
 				Default: "direct",
 			},
 		},
+		{
+			Name: "project description",
+			Prompt: &survey.Input{
+				Message: "Enter project description:",
+				Default: "A Python project",
+			},
+		},
 	}
 
 	answers := struct {
-		ProjectName      string `survey:"projectname"`
-		ProjectType      string `survey:"projecttype"`
-		ProjectStructure string `survey:"projectstructure"`
+		ProjectName        string `survey:"projectname"`
+		ProjectType        string `survey:"projecttype"`
+		ProjectStructure   string `survey:"projectstructure"`
+		ProjectDescription string `survey:"project description"`
 	}{}
 
 	if err := survey.Ask(questions, &answers); err != nil {
@@ -108,6 +116,7 @@ func collectProjectDetails(cfg *config.ProjectConfig) error {
 	cfg.ProjectName = answers.ProjectName
 	cfg.ProjectType = answers.ProjectType
 	cfg.ProjectStructure = answers.ProjectStructure
+	cfg.ProjectDescription = answers.ProjectDescription
 
 	return nil
 }

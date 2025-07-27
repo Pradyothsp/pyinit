@@ -6,14 +6,15 @@ import (
 
 // ProjectConfig holds all the configuration for a Python project
 type ProjectConfig struct {
-	UserName         string
-	Email            string
-	ProjectName      string
-	ProjectType      string
-	ProjectStructure string
-	ProjectPath      string
-	MainDirName      string
-	PythonVersion    string
+	UserName           string
+	Email              string
+	ProjectName        string
+	ProjectDescription string
+	ProjectType        string
+	ProjectStructure   string
+	ProjectPath        string
+	MainDirName        string
+	PythonVersion      string
 }
 
 // ProjectTypes returns available project types
@@ -45,12 +46,13 @@ func SanitizeProjectName(name string) string {
 // TemplateContext returns a map for template rendering
 func (pc *ProjectConfig) TemplateContext() map[string]interface{} {
 	return map[string]interface{}{
-		"project_name":      pc.ProjectName,
-		"project_type":      pc.ProjectType,
-		"project_structure": pc.ProjectStructure,
-		"user_name":         pc.UserName,
-		"email":             pc.Email,
-		"main_dir_name":     pc.MainDirName,
-		"python_version":    pc.PythonVersion,
+		"project_name":        pc.ProjectName,
+		"project_type":        pc.ProjectType,
+		"project_structure":   pc.ProjectStructure,
+		"project_description": pc.ProjectDescription,
+		"user_name":           pc.UserName,
+		"email":               pc.Email,
+		"main_dir_name":       pc.MainDirName,
+		"python_version":      pc.PythonVersion,
 	}
 }
