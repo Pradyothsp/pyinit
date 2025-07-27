@@ -1,0 +1,98 @@
+[project]
+name = "{{ project_name }}"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.13"
+authors = [{ name = "{{ user_name }}", email = "{{ email }}" }]
+dependencies = []
+
+[dependency-groups]
+dev = []
+
+[project.scripts]
+fmt = "scripts.fmt:main"
+fmt-check = "scripts.fmt_check:main"
+
+[tool.uv]
+package = true
+
+[tool.setuptools]
+packages = ["{{ main_dir_name }}", "scripts"]
+
+[tool.pyright]
+include = ["{{ main_dir_name }}", "scripts"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
+reportMissingImports = true
+reportMissingTypeStubs = false
+useLibraryCodeForTypes = true
+reportOptionalMemberAccess = false
+reportUnknownMemberType = false
+reportMissingTypeArgument = false
+reportUnknownVariableType = false
+reportUnknownParameterType = false
+reportAttributeAccessIssue = false
+reportUntypedFunctionDecorator = false
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+# Allow autofix behavior
+fix = true
+unsafe-fixes = false
+
+# Exclude files and directories
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations",
+]
+
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle errors
+    "F", # pyflakes
+    "UP", # pyupgrade
+    "B", # flake8-bugbear
+    "SIM", # flake8-simplify
+    "I", # isort
+    "RUF", # Ruff-specific rules
+    "C90", # McCabe complexity
+]
+
+# Ignore specific rules
+ignore = [
+    "E501", # Line too long (handled by formatter)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google" # Use Google-style docstrings
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
