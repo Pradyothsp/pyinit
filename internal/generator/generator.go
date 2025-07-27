@@ -30,7 +30,7 @@ func (g *Generator) GenerateProject(cfg *config.ProjectConfig) error {
 	}
 
 	// Generate README.md
-	if err := g.generateReadme(cfg); err != nil {
+	if err := g.generateFileFromTemplate(cfg, "README.md.j2", "README.md"); err != nil {
 		return fmt.Errorf("failed to generate README.md: %w", err)
 	}
 
@@ -55,22 +55,6 @@ func (g *Generator) createProjectDirectory(cfg *config.ProjectConfig) error {
 	// Create the directory
 	if err := os.MkdirAll(cfg.ProjectPath, 0755); err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
-	}
-
-	return nil
-}
-
-func (g *Generator) generateReadme(cfg *config.ProjectConfig) error {
-	templatePath := "README.md.j2"
-	outputPath := filepath.Join(cfg.ProjectPath, "README.md")
-
-	content, err := g.templateEngine.RenderTemplate(templatePath, cfg.TemplateContext())
-	if err != nil {
-		return fmt.Errorf("failed to render README template: %w", err)
-	}
-
-	if err := os.WriteFile(outputPath, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write README.md: %w", err)
 	}
 
 	return nil
