@@ -1,7 +1,11 @@
 package template
 
 import (
+	"bytes"
+	"embed"
 	"fmt"
+	"github.com/Pradyothsp/pyinit"
+	"io"
 	"path/filepath"
 
 	"github.com/flosch/pongo2/v6"
@@ -13,15 +17,32 @@ type Engine struct {
 	loader      pongo2.TemplateLoader
 }
 
-// NewEngine creates a new template engine
+// NewEngine creates a new template engine with embedded templates
 func NewEngine() *Engine {
-	templateDir := "templates"
-	loader := pongo2.MustNewLocalFileSystemLoader(templateDir)
+	// Create a loader that uses embedded files
+	loader := &EmbeddedLoader{fs: pyinit.EmbeddedTemplates}
 
 	return &Engine{
-		templateDir: templateDir,
+		templateDir: "embedded",
 		loader:      loader,
 	}
+}
+
+// EmbeddedLoader implements pongo2.TemplateLoader for embedded files
+type EmbeddedLoader struct {
+	fs embed.FS
+}
+
+func (e *EmbeddedLoader) Abs(base, name string) string {
+	return filepath.Join("templates", name)
+}
+
+func (e *EmbeddedLoader) Get(path string) (io.Reader, error) {
+	content, err := e.fs.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewReader(content), nil
 }
 
 // RenderTemplate renders a template file with the given context
