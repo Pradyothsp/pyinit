@@ -39,6 +39,11 @@ func (g *Generator) GenerateProject(cfg *config.ProjectConfig) error {
 		return fmt.Errorf("failed to create scripts directory: %w", err)
 	}
 
+	// Generate .gitignore
+	if err := g.generateFileFromTemplate(cfg, ".gitignore.j2", ".gitignore"); err != nil {
+		return fmt.Errorf("failed to generate .gitignore: %w", err)
+	}
+
 	return nil
 }
 
