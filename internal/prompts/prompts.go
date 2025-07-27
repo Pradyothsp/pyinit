@@ -25,6 +25,11 @@ func CollectProjectInfo() (*config.ProjectConfig, error) {
 		return nil, fmt.Errorf("failed to set project path: %w", err)
 	}
 
+	// Confirm project location
+	if err := confirmProjectLocation(cfg); err != nil {
+		return nil, fmt.Errorf("failed to confirm project location: %w", err)
+	}
+
 	return cfg, nil
 }
 
@@ -124,4 +129,57 @@ func ConfirmDirectoryCreation(path string) (bool, error) {
 		return confirm, nil
 	}
 	return true, nil
+}
+
+func confirmProjectLocation(cfg *config.ProjectConfig) error {
+	// Get an absolute path for display
+	absPath, err := filepath.Abs(cfg.ProjectPath)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path: %w", err)
+	}
+
+	// Ask if the user wants to create a project in the current directory
+	createHere := false
+	prompt := &survey.Confirm{
+		Message: fmt.Sprintf("Create project in current directory?\nProject will be created at: %s", absPath),
+		Default: true,
+	}
+
+	if err := survey.AskOne(prompt, &createHere); err != nil {
+		return fmt.Errorf("failed to get directory confirmation: %w", err)
+	}
+
+	// If a user doesn't want to create here, ask for a custom path
+	if !createHere {
+		if err := askForCustomPath(cfg); err != nil {
+			return fmt.Errorf("failed to get custom path: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func askForCustomPath(cfg *config.ProjectConfig) error {
+	// Get the current working directory as default
+	cwd, err := os.Getwd()
+	if err != nil {
+		cwd = "."
+	}
+
+	var customDir string
+	prompt := &survey.Input{
+		Message: "Enter parent directory path:",
+		Default: cwd,
+		Help:    fmt.Sprintf("Project '%s' will be created inside this directory", config.SanitizeProjectName(cfg.ProjectName)),
+	}
+
+	if err := survey.AskOne(prompt, &customDir); err != nil {
+		return fmt.Errorf("failed to get custom directory: %w", err)
+	}
+
+	// Create the full project path by combining custom directory + project name
+	projectDir := config.SanitizeProjectName(cfg.ProjectName)
+	cfg.ProjectPath = filepath.Join(customDir, projectDir)
+
+	return nil
 }
