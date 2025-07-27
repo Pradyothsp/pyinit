@@ -2,12 +2,11 @@ package generator
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-
 	"github.com/Pradyothsp/pyinit/internal/config"
 	"github.com/Pradyothsp/pyinit/internal/prompts"
 	"github.com/Pradyothsp/pyinit/pkg/template"
+	"os"
+	"path/filepath"
 )
 
 // Generator handles project generation
@@ -42,6 +41,11 @@ func (g *Generator) GenerateProject(cfg *config.ProjectConfig) error {
 	// Generate .gitignore
 	if err := g.generateFileFromTemplate(cfg, ".gitignore.j2", ".gitignore"); err != nil {
 		return fmt.Errorf("failed to generate .gitignore: %w", err)
+	}
+
+	// Create the main project structure
+	if err := g.createMainDirectory(cfg); err != nil {
+		return fmt.Errorf("failed to create main project directory: %w", err)
 	}
 
 	return nil
@@ -100,6 +104,21 @@ func (g *Generator) createScriptsDirectory(cfg *config.ProjectConfig) error {
 	// Generate fmt_check.py
 	if err := g.generateFileFromTemplate(cfg, "fmt_check.py.j2", filepath.Join("scripts", "fmt_check.py")); err != nil {
 		return fmt.Errorf("failed to generate fmt_check.py: %w", err)
+	}
+
+	return nil
+}
+
+func (g *Generator) createMainDirectory(cfg *config.ProjectConfig) error {
+	mainDir := filepath.Join(cfg.ProjectPath, cfg.MainDirName)
+	if err := os.MkdirAll(mainDir, 0755); err != nil {
+		return fmt.Errorf("failed to create main project directory: %w", err)
+	}
+
+	// Generate __init__.py in the main project directory
+	initPath := filepath.Join(mainDir, "__init__.py")
+	if err := os.WriteFile(initPath, []byte(""), 0644); err != nil {
+		return fmt.Errorf("failed to create __init__.py in main project directory: %w", err)
 	}
 
 	return nil

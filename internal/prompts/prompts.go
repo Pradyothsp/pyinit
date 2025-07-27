@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/Pradyothsp/pyinit/internal/config"
@@ -28,6 +29,11 @@ func CollectProjectInfo() (*config.ProjectConfig, error) {
 	// Confirm project location
 	if err := confirmProjectLocation(cfg); err != nil {
 		return nil, fmt.Errorf("failed to confirm project location: %w", err)
+	}
+
+	// Set the main project directory
+	if err := SetMainDirName(cfg); err != nil {
+		return nil, fmt.Errorf("failed to set main directory name: %w", err)
 	}
 
 	return cfg, nil
@@ -180,6 +186,17 @@ func askForCustomPath(cfg *config.ProjectConfig) error {
 	// Create the full project path by combining custom directory + project name
 	projectDir := config.SanitizeProjectName(cfg.ProjectName)
 	cfg.ProjectPath = filepath.Join(customDir, projectDir)
+
+	return nil
+}
+
+func SetMainDirName(cfg *config.ProjectConfig) error {
+	// Set the main directory name based on the project structure
+	if cfg.ProjectStructure == "src" {
+		cfg.MainDirName = "src"
+	} else {
+		cfg.MainDirName = strings.ReplaceAll(cfg.ProjectName, "-", "_")
+	}
 
 	return nil
 }

@@ -12,6 +12,7 @@ type ProjectConfig struct {
 	ProjectType      string
 	ProjectStructure string
 	ProjectPath      string
+	MainDirName      string
 }
 
 // ProjectTypes returns available project types
@@ -48,5 +49,6 @@ func (pc *ProjectConfig) TemplateContext() map[string]interface{} {
 		"project_structure": pc.ProjectStructure,
 		"user_name":         pc.UserName,
 		"email":             pc.Email,
+		"main_dir_name":     pc.MainDirName,
 	}
 }
