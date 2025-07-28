@@ -9,13 +9,22 @@ on:
 
 permissions:
   contents: write
+  id-token: write  # For PyPI trusted publishing
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed for setuptools-scm
+
+      - name: Extract version
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -38,6 +47,80 @@ jobs:
             pyinit-darwin-arm64
             pyinit-linux-amd64
 
+  publish-python-package:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    environment: PyPI
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed for setuptools-scm
+
+      - name: Wait for release assets
+        run: |
+          echo "Waiting 30 seconds for release assets to be available..."
+          sleep 30
+
+      - name: Update Python package checksums
+        run: |
+          VERSION="${{ needs.build-and-release.outputs.version }}"
+          echo "Updating checksums for version: $VERSION"
+          
+          # Download the released binaries (need v prefix for GitHub releases)
+          curl -L -f -o pyinit-darwin-amd64 "https://github.com/Pradyothsp/pyinit/releases/download/v$VERSION/pyinit-darwin-amd64"
+          curl -L -f -o pyinit-darwin-arm64 "https://github.com/Pradyothsp/pyinit/releases/download/v$VERSION/pyinit-darwin-arm64"
+          curl -L -f -o pyinit-linux-amd64 "https://github.com/Pradyothsp/pyinit/releases/download/v$VERSION/pyinit-linux-amd64"
+          
+          # Calculate checksums
+          DARWIN_AMD64_SHA=$(sha256sum pyinit-darwin-amd64 | cut -d' ' -f1)
+          DARWIN_ARM64_SHA=$(sha256sum pyinit-darwin-arm64 | cut -d' ' -f1)
+          LINUX_AMD64_SHA=$(sha256sum pyinit-linux-amd64 | cut -d' ' -f1)
+          
+          echo "Checksums:"
+          echo "  Darwin AMD64: $DARWIN_AMD64_SHA"
+          echo "  Darwin ARM64: $DARWIN_ARM64_SHA"
+          echo "  Linux AMD64:  $LINUX_AMD64_SHA"
+          
+          # Update downloader.py with new checksums
+          # Add new version entry to checksums dictionary
+          NEW_CHECKSUMS="        \"$VERSION\": {
+              \"darwin-amd64\": \"$DARWIN_AMD64_SHA\",
+              \"darwin-arm64\": \"$DARWIN_ARM64_SHA\",
+              \"linux-amd64\": \"$LINUX_AMD64_SHA\",
+          },"
+          
+          # Insert before the last closing brace
+          sed -i "/^    }/i\\$NEW_CHECKSUMS" python-package/pyinit_cli/downloader.py
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build Python package
+        run: |
+          cd python-package
+          python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: python-package/dist/
+
+      - name: Commit checksum updates
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add python-package/pyinit_cli/downloader.py
+          git commit -m "Add checksums for v${{ needs.build-and-release.outputs.version }}" || exit 0
+          git push
+
   trigger-homebrew-update:
     needs: build-and-release
     runs-on: ubuntu-latest
@@ -48,7 +131,7 @@ jobs:
         run: |
           echo "Creating JSON payload..."
           JSON_PAYLOAD=$(jq -n \
-            --arg version "${{ github.ref_name }}" \
+            --arg version "v${{ needs.build-and-release.outputs.version }}" \
             --arg repo "${{ github.repository }}" \
             '{event_type: "new-release", client_payload: {version: $version, repository: $repo}}')
           

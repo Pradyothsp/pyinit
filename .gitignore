@@ -30,3 +30,13 @@ go.work.sum
 # Editor/IDE
 .idea/
 .vscode/
+
+# Python cache
+__pycache__/
+
+# Python virtual environment
+venv/
+.venv/
+
+# Python eggs
+*.egg*
