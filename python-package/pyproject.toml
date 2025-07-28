@@ -1,0 +1,133 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyinit-cli"
+dynamic = ["version"]
+description = "Interactive Python project scaffolding tool"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Pradyoth S P", email = "contact@pradyoth-sp.me"}
+]
+keywords = ["python", "project", "scaffold", "cli", "generator"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Code Generators",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+dependencies = [
+    "requests>=2.25.0",
+]
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.403",
+    "ruff>=0.12.5",
+]
+
+[tool.uv]
+package = true
+
+[project.urls]
+Homepage = "https://github.com/Pradyothsp/pyinit"
+Repository = "https://github.com/Pradyothsp/pyinit"
+Issues = "https://github.com/Pradyothsp/pyinit/issues"
+
+[project.scripts]
+pyinit = "pyinit_cli.cli:main"
+fmt = "scripts.fmt:main"
+fmt-check = "scripts.fmt_check:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pyinit_cli*", "scripts"]
+
+[tool.setuptools_scm]
+# Automatically get version from Git tags
+fallback_version = "0.0.0.dev0"
+
+#[tool.setuptools]
+#packages = ["pyinit_cli", "scripts"]
+
+[tool.pyright]
+include = ["pyinit_cli", "scripts"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.13"
+typeCheckingMode = "strict"
+reportMissingImports = true
+useLibraryCodeForTypes = true
+
+[tool.ruff]
+line-length = 88
+target-version = "py313"
+
+# Allow autofix behavior
+fix = true
+unsafe-fixes = false
+
+# Exclude files and directories
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations",
+]
+
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle errors
+    "F", # pyflakes
+    "UP", # pyupgrade
+    "B", # flake8-bugbear
+    "SIM", # flake8-simplify
+    "I", # isort
+    "RUF", # Ruff-specific rules
+    "C90", # McCabe complexity
+]
+
+# Ignore specific rules
+ignore = [
+    "E501", # Line too long (handled by formatter)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google" # Use Google-style docstrings
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
