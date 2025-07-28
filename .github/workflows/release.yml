@@ -21,6 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Needed for setuptools-scm
+          ref: ${{ github.ref }}  # Ensure we checkout the actual tag
 
       - name: Extract version
         id: version
@@ -82,16 +83,19 @@ jobs:
           echo "  Darwin ARM64: $DARWIN_ARM64_SHA"
           echo "  Linux AMD64:  $LINUX_AMD64_SHA"
           
-          # Update downloader.py with new checksums
-          # Add new version entry to checksums dictionary
-          NEW_CHECKSUMS="        \"$VERSION\": {
-              \"darwin-amd64\": \"$DARWIN_AMD64_SHA\",
-              \"darwin-arm64\": \"$DARWIN_ARM64_SHA\",
-              \"linux-amd64\": \"$LINUX_AMD64_SHA\",
-          },"
-          
-          # Insert before the last closing brace
-          sed -i "/^    }/i\\$NEW_CHECKSUMS" python-package/pyinit_cli/downloader.py
+          # Update downloader.py with new checksums using awk
+          awk -v version="$VERSION" -v amd64="$DARWIN_AMD64_SHA" -v arm64="$DARWIN_ARM64_SHA" -v linux="$LINUX_AMD64_SHA" '
+          /^    }$/ && !added {
+              printf "        \"%s\": {\n", version
+              printf "            \"darwin-amd64\": \"%s\",\n", amd64
+              printf "            \"darwin-arm64\": \"%s\",\n", arm64
+              printf "            \"linux-amd64\": \"%s\",\n", linux
+              printf "        },\n"
+              added = 1
+          }
+          { print }
+          ' python-package/pyinit_cli/downloader.py > temp_downloader.py
+          mv temp_downloader.py python-package/pyinit_cli/downloader.py
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -101,11 +105,24 @@ jobs:
       - name: Install build dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install build
+          pip install build setuptools-scm
+
+      - name: Debug Git and version info
+        run: |
+          cd python-package
+          echo "Current git status:"
+          git status
+          echo "Git tags:"
+          git tag -l
+          echo "Current ref: ${{ github.ref }}"
+          echo "Setuptools-scm version detection:"
+          python -m setuptools_scm || echo "setuptools-scm not yet installed"
 
       - name: Build Python package
         run: |
           cd python-package
+          # Force setuptools-scm to use the correct version
+          export SETUPTOOLS_SCM_PRETEND_VERSION="${{ needs.build-and-release.outputs.version }}"
           python -m build
 
       - name: Publish to PyPI
@@ -119,7 +136,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add python-package/pyinit_cli/downloader.py
           git commit -m "Add checksums for v${{ needs.build-and-release.outputs.version }}" || exit 0
-          git push
+          git push origin HEAD:main
 
   trigger-homebrew-update:
     needs: build-and-release
