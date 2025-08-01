@@ -11,7 +11,6 @@ type ProjectConfig struct {
 	ProjectName        string
 	ProjectDescription string
 	ProjectType        string
-	ProjectStructure   string
 	ProjectPath        string
 	MainDirName        string
 	PythonVersion      string
@@ -19,7 +18,7 @@ type ProjectConfig struct {
 
 // ProjectTypes returns available project types
 func ProjectTypes() []string {
-	return []string{"cli", "web", "library", "data-science"}
+	return []string{"basic", "cli", "web", "library", "data-science"}
 }
 
 // ProjectStructures returns available project structures
@@ -48,7 +47,6 @@ func (pc *ProjectConfig) TemplateContext() map[string]interface{} {
 	return map[string]interface{}{
 		"project_name":        pc.ProjectName,
 		"project_type":        pc.ProjectType,
-		"project_structure":   pc.ProjectStructure,
 		"project_description": pc.ProjectDescription,
 		"user_name":           pc.UserName,
 		"email":               pc.Email,

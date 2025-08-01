@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/Pradyothsp/pyinit/internal/config"
@@ -31,11 +30,6 @@ func CollectProjectInfo() (*config.ProjectConfig, error) {
 		return nil, fmt.Errorf("failed to confirm project location: %w", err)
 	}
 
-	// Set the main project directory
-	if err := SetMainDirName(cfg); err != nil {
-		return nil, fmt.Errorf("failed to set main directory name: %w", err)
-	}
-
 	// Ask Python version
 	if err := askForPythonVersion(cfg); err != nil {
 		return nil, fmt.Errorf("failed to get Python version: %w", err)
@@ -47,12 +41,14 @@ func CollectProjectInfo() (*config.ProjectConfig, error) {
 func collectUserDetails(cfg *config.ProjectConfig) error {
 	questions := []*survey.Question{
 		{
-			Name:   "username",
-			Prompt: &survey.Input{Message: "Enter your name:"},
+			Name:     "username",
+			Prompt:   &survey.Input{Message: "Enter your name:"},
+			Validate: survey.Required,
 		},
 		{
-			Name:   "email",
-			Prompt: &survey.Input{Message: "Enter your email:"},
+			Name:     "email",
+			Prompt:   &survey.Input{Message: "Enter your email:"},
+			Validate: validateEmail,
 		},
 	}
 
@@ -74,24 +70,22 @@ func collectUserDetails(cfg *config.ProjectConfig) error {
 func collectProjectDetails(cfg *config.ProjectConfig) error {
 	questions := []*survey.Question{
 		{
-			Name:   "projectname",
-			Prompt: &survey.Input{Message: "Enter project name:"},
+			Name:     "projectname",
+			Prompt:   &survey.Input{Message: "Enter project name:"},
+			Validate: survey.Required,
 		},
 		{
 			Name: "projecttype",
 			Prompt: &survey.Select{
 				Message: "Select project type:",
 				Options: config.ProjectTypes(),
-				Default: "cli",
+				Default: "basic",
 			},
 		},
 		{
-			Name: "projectstructure",
-			Prompt: &survey.Select{
-				Message: "Select project structure:",
-				Options: config.ProjectStructures(),
-				Default: "direct",
-			},
+			Name:     "maindirname",
+			Prompt:   &survey.Input{Message: "Enter Main Directory Name:"},
+			Validate: survey.Required,
 		},
 		{
 			Name: "project description",
@@ -105,7 +99,7 @@ func collectProjectDetails(cfg *config.ProjectConfig) error {
 	answers := struct {
 		ProjectName        string `survey:"projectname"`
 		ProjectType        string `survey:"projecttype"`
-		ProjectStructure   string `survey:"projectstructure"`
+		MainDirName        string `survey:"maindirname"`
 		ProjectDescription string `survey:"project description"`
 	}{}
 
@@ -115,7 +109,7 @@ func collectProjectDetails(cfg *config.ProjectConfig) error {
 
 	cfg.ProjectName = answers.ProjectName
 	cfg.ProjectType = answers.ProjectType
-	cfg.ProjectStructure = answers.ProjectStructure
+	cfg.MainDirName = answers.MainDirName
 	cfg.ProjectDescription = answers.ProjectDescription
 
 	return nil
@@ -217,17 +211,6 @@ func askForPythonVersion(cfg *config.ProjectConfig) error {
 	}
 
 	cfg.PythonVersion = pythonVersion
-
-	return nil
-}
-
-func SetMainDirName(cfg *config.ProjectConfig) error {
-	// Set the main directory name based on the project structure
-	if cfg.ProjectStructure == "src" {
-		cfg.MainDirName = "src"
-	} else {
-		cfg.MainDirName = strings.ReplaceAll(cfg.ProjectName, "-", "_")
-	}
 
 	return nil
 }
