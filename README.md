@@ -1,64 +1,90 @@
 # pyinit
 
-An interactive CLI tool to create Python project scaffolds with a customizable structure.
+🚀 **Interactive Python Project Scaffolding Tool**
 
-## Features
+An easy-to-use CLI tool that helps you create well-structured Python projects with modern development tools pre-configured. No more starting from scratch or copying project templates!
 
-- **Interactive Setup**: Guides you through creating a new Python project.
-- **Customizable Project Structure**: Choose between a `src` layout or a direct layout.
-- **Project Types**: Supports different project types like `cli` and `package`.
-- **Automated Environment Setup**: Automatically creates a virtual environment and installs dependencies.
-- **Pre-configured Tools**: Comes with pre-configured tools for formatting (`black`, `isort`) and linting (`ruff`).
-- **GitHub Actions**: Includes basic GitHub Actions for CI/CD.
+## ✨ Why pyinit?
 
-## Usage
+- **Interactive Setup** - Guided project creation with sensible defaults
+- **Modern Tools** - Pre-configured with [uv](https://docs.astral.sh/uv/) for fast dependency management, [ruff](https://docs.astral.sh/ruff/) for lightning-fast linting and formatting, and [pyright](https://github.com/microsoft/pyright) for robust type checking
+- **Zero Configuration** - Everything works out of the box, no complex setup required
 
-To use `pyinit`, simply run the command:
+## 📦 Installation
 
+### Homebrew (macOS/Linux)
+```bash
+brew install Pradyothsp/pyinit/pyinit
+```
+
+### pip
+```bash
+pip install pyinit-cli
+```
+
+## 🚀 Quick Start
+
+Simply run:
 ```bash
 pyinit
 ```
 
-The tool will then guide you through the setup process, asking for the following information:
+The tool will guide you through:
+1. **Basic Information** - Your name, email, and project details
+2. **Project Configuration** - Project name, type, and description
+3. **Setup Options** - Python version and development environment
 
-- Your name and email
-- Project name, type, and description
-- Project structure (`src` or direct)
-- Python version
+## 📁 Generated Project Structure
 
-After gathering the required information, `pyinit` will generate the project structure and offer to set up the development environment.
-
-## Generated Project Structure
-
-The generated project will have the following structure:
+Here's what you get with a basic project:
 
 ```
-.
-├── .gitignore
-├── .python-version
-├── pyproject.toml
-├── README.md
-├── <project_name>/
-│   └── __init__.py
-└── tests/
-    └── __init__.py
+my-awesome-project/
+├── .gitignore              # Comprehensive Python .gitignore
+├── .python-version         # Python version specification
+├── pyproject.toml          # Modern Python project configuration
+├── README.md               # Project documentation
+├── my_awesome_project/     # Main package directory
+│   ├── __init__.py
+│   └── main.py             # Entry point with "Hello, World!"
+└── scripts/                # Development scripts
+    ├── __init__.py
+    ├── fmt.py              # Code formatting (ruff)
+    └── fmt_check.py        # Linting and type checking
 ```
 
-If you choose the `src` layout, the structure will be:
+## 🔧 Development Commands
 
-```
-.
-├── .gitignore
-├── .python-version
-├── pyproject.toml
-├── README.md
-├── src/
-│   └── <project_name>/
-│       └── __init__.py
-└── tests/
-    └── __init__.py
+After project creation, you can use these commands for development:
+
+```bash
+# Format code and fix issues
+uv run fmt
+
+# Check code quality (linting + type checking)
+uv run fmt-check
 ```
 
-## License
+## 🌟 Upcoming Features
 
-This project is licensed under the terms of the MIT license. See [LICENSE](LICENSE) for more details.
+- **More Package Managers** - APT and Yarn registry support
+- **Enhanced Project Types** - CLI, web, data-science, and library templates
+- **Git Integration** - Automatic git initialization and first commit
+- **Platform Support** - GitHub and GitLab specific configurations and workflows
+
+## 💻 Requirements
+
+- **Python 3.9+**
+- **Platforms**: macOS, Linux (Windows support coming soon)
+
+## 🤝 Contributing
+
+Interested in contributing? Check out our [Developer Guide](CONTRIBUTING.md) for setup instructions and development workflows.
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+**Made with ❤️ for Python developers who value clean project structure and modern tooling.**
