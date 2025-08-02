@@ -1,5 +1,11 @@
 # pyinit
 
+[![GitHub Release](https://img.shields.io/github/v/release/Pradyothsp/pyinit)](https://github.com/Pradyothsp/pyinit/releases)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Pradyothsp/pyinit/release.yml)](https://github.com/Pradyothsp/pyinit/actions)
+[![PyPI](https://img.shields.io/pypi/v/pyinit-cli)](https://pypi.org/project/pyinit-cli/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+🚀 **Interactive Python Project Scaffolding Tool**
 🚀 **Interactive Python Project Scaffolding Tool**
 
 An easy-to-use CLI tool that helps you create well-structured Python projects with modern development tools pre-configured. No more starting from scratch or copying project templates!
