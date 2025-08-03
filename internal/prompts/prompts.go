@@ -9,18 +9,24 @@ import (
 	"github.com/Pradyothsp/pyinit/internal/config"
 )
 
+// QuestionStep represents one question in our flow
+type QuestionStep struct {
+	ID        string                           // Unique identifier for this question
+	Question  *survey.Question                 // The actual survey question
+	Condition func(*config.ProjectConfig) bool // Function that returns true if we should ask this question
+	Required  bool                             // Whether this question is mandatory
+}
+
 // CollectProjectInfo gathers all necessary information from the user
 func CollectProjectInfo() (*config.ProjectConfig, error) {
 	cfg := &config.ProjectConfig{}
 
-	if err := collectUserDetails(cfg); err != nil {
-		return nil, fmt.Errorf("failed to collect user details: %w", err)
+	// Collect all info using a question builder pattern
+	if err := collectAllDetails(cfg); err != nil {
+		return nil, fmt.Errorf("failed to collect details: %w", err)
 	}
 
-	if err := collectProjectDetails(cfg); err != nil {
-		return nil, fmt.Errorf("failed to collect project details: %w", err)
-	}
-
+	// Set a project path based on collected info
 	if err := setProjectPath(cfg); err != nil {
 		return nil, fmt.Errorf("failed to set project path: %w", err)
 	}
@@ -30,89 +36,167 @@ func CollectProjectInfo() (*config.ProjectConfig, error) {
 		return nil, fmt.Errorf("failed to confirm project location: %w", err)
 	}
 
-	// Ask Python version
-	if err := askForPythonVersion(cfg); err != nil {
-		return nil, fmt.Errorf("failed to get Python version: %w", err)
-	}
-
 	return cfg, nil
 }
 
-func collectUserDetails(cfg *config.ProjectConfig) error {
-	questions := []*survey.Question{
-		{
-			Name:     "username",
-			Prompt:   &survey.Input{Message: "Enter your name:"},
-			Validate: survey.Required,
-		},
-		{
-			Name:     "email",
-			Prompt:   &survey.Input{Message: "Enter your email:"},
-			Validate: validateEmail,
-		},
+func collectAllDetails(cfg *config.ProjectConfig) error {
+	allQuestions := buildCompleteQuestionFlow()
+
+	for _, step := range allQuestions {
+		// Check if we should ask this question
+		if step.Condition != nil && !step.Condition(cfg) {
+			continue // Skip this question
+		}
+
+		// Use a string type instead of interface{}
+		var answer string
+
+		// Handle a nil validator case
+		var options []survey.AskOpt
+		if step.Question.Validate != nil {
+			options = append(options, survey.WithValidator(step.Question.Validate))
+		}
+
+		if err := survey.AskOne(step.Question.Prompt, &answer, options...); err != nil {
+			return fmt.Errorf("failed to collect %s: %w", step.ID, err)
+		}
+
+		// Immediately update config so next questions can use this info
+		if err := updateConfigFromAnswer(cfg, step.ID, answer); err != nil {
+			return fmt.Errorf("failed to process %s: %w", step.ID, err)
+		}
 	}
 
-	answers := struct {
-		Username string
-		Email    string
-	}{}
-
-	if err := survey.Ask(questions, &answers); err != nil {
-		return err
-	}
-
-	cfg.UserName = answers.Username
-	cfg.Email = answers.Email
+	// Print the collected configuration for debugging
+	fmt.Printf("Collected Configuration: %+v\n", cfg)
 
 	return nil
 }
 
-func collectProjectDetails(cfg *config.ProjectConfig) error {
-	questions := []*survey.Question{
-		{
-			Name:     "projectname",
-			Prompt:   &survey.Input{Message: "Enter project name:"},
-			Validate: survey.Required,
-		},
-		{
-			Name: "projecttype",
-			Prompt: &survey.Select{
-				Message: "Select project type:",
-				Options: config.ProjectTypes(),
-				Default: "basic",
-			},
-		},
-		{
-			Name:     "maindirname",
-			Prompt:   &survey.Input{Message: "Enter Main Directory Name:"},
-			Validate: survey.Required,
-		},
-		{
-			Name: "project description",
-			Prompt: &survey.Input{
-				Message: "Enter project description:",
-				Default: "A Python project",
-			},
-		},
+// Helper function to update config based on question ID
+func updateConfigFromAnswer(cfg *config.ProjectConfig, questionID string, answer string) error {
+	switch questionID {
+	case "username":
+		cfg.UserName = answer
+	case "email":
+		cfg.Email = answer
+	case "projectname":
+		cfg.ProjectName = answer
+	case "projecttype":
+		cfg.ProjectType = answer
+	case "webframework":
+		cfg.WebFramework = answer
+	case "maindirname":
+		cfg.MainDirName = answer
+	case "description":
+		cfg.ProjectDescription = answer
+	case "pythonversion":
+		cfg.PythonVersion = answer
+	default:
+		return fmt.Errorf("unknown question ID: %s", questionID)
 	}
-
-	answers := struct {
-		ProjectName        string `survey:"projectname"`
-		ProjectType        string `survey:"projecttype"`
-		MainDirName        string `survey:"maindirname"`
-		ProjectDescription string `survey:"project description"`
-	}{}
-
-	if err := survey.Ask(questions, &answers); err != nil {
-		return err
-	}
-
-	cfg.ProjectName = answers.ProjectName
-	cfg.ProjectType = answers.ProjectType
-	cfg.MainDirName = answers.MainDirName
-	cfg.ProjectDescription = answers.ProjectDescription
 
 	return nil
+}
+
+func buildCompleteQuestionFlow() []QuestionStep {
+	return []QuestionStep{
+		// User Details
+		{
+			ID:        "username",
+			Required:  true,
+			Condition: nil,
+			Question: &survey.Question{
+				Name:     "username",
+				Prompt:   &survey.Input{Message: "Enter your name:"},
+				Validate: survey.Required,
+			},
+		},
+		{
+			ID:        "email",
+			Required:  true,
+			Condition: nil,
+			Question: &survey.Question{
+				Name:     "email",
+				Prompt:   &survey.Input{Message: "Enter your email:"},
+				Validate: validateEmail,
+			},
+		},
+
+		// Project Details
+		{
+			ID:        "projectname",
+			Required:  true,
+			Condition: nil,
+			Question: &survey.Question{
+				Name:     "projectname",
+				Prompt:   &survey.Input{Message: "Enter project name:"},
+				Validate: survey.Required,
+			},
+		},
+		{
+			ID:        "projecttype",
+			Required:  true,
+			Condition: nil,
+			Question: &survey.Question{
+				Name: "projecttype",
+				Prompt: &survey.Select{
+					Message: "Select project type:",
+					Options: config.ProjectTypes(),
+					Default: "basic",
+				},
+			},
+		},
+		{
+			ID:       "webframework",
+			Required: false,
+			Condition: func(cfg *config.ProjectConfig) bool {
+				return cfg.ProjectType == "web"
+			},
+			Question: &survey.Question{
+				Name: "webframework",
+				Prompt: &survey.Select{
+					Message: "Select web framework:",
+					Options: config.WebFrameworks(),
+					Default: "fastapi",
+				},
+			},
+		},
+		{
+			ID:        "maindirname",
+			Required:  true,
+			Condition: nil,
+			Question: &survey.Question{
+				Name:     "maindirname",
+				Prompt:   &survey.Input{Message: "Enter Main Directory Name:"},
+				Validate: survey.Required,
+			},
+		},
+		{
+			ID:        "description",
+			Required:  true,
+			Condition: nil,
+			Question: &survey.Question{
+				Name: "description",
+				Prompt: &survey.Input{
+					Message: "Enter project description:",
+					Default: "A Python project",
+				},
+			},
+		},
+		{
+			ID:        "pythonversion",
+			Required:  true,
+			Condition: nil,
+			Question: &survey.Question{
+				Name: "pythonversion",
+				Prompt: &survey.Input{
+					Message: "Enter Python version (default is 3.13):",
+					Default: "3.13",
+				},
+			},
+		},
+	}
 }
 
 func setProjectPath(cfg *config.ProjectConfig) error {
@@ -194,23 +278,6 @@ func askForCustomPath(cfg *config.ProjectConfig) error {
 	// Create the full project path by combining custom directory + project name
 	projectDir := config.SanitizeProjectName(cfg.ProjectName)
 	cfg.ProjectPath = filepath.Join(customDir, projectDir)
-
-	return nil
-}
-
-func askForPythonVersion(cfg *config.ProjectConfig) error {
-	// Ask for the Python version
-	var pythonVersion string
-	prompt := &survey.Input{
-		Message: "Enter Python version (default is 3.13):",
-		Default: "3.13",
-	}
-
-	if err := survey.AskOne(prompt, &pythonVersion); err != nil {
-		return fmt.Errorf("failed to get Python version: %w", err)
-	}
-
-	cfg.PythonVersion = pythonVersion
 
 	return nil
 }

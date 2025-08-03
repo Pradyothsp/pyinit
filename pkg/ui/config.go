@@ -50,7 +50,12 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to open config file: %w", err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Printf("Warning: Failed to close config file: %v\n", err)
+		}
+	}(file)
 
 	config := DefaultConfig()
 	scanner := bufio.NewScanner(file)

@@ -11,6 +11,7 @@ type ProjectConfig struct {
 	ProjectName        string
 	ProjectDescription string
 	ProjectType        string
+	WebFramework       string
 	ProjectPath        string
 	MainDirName        string
 	PythonVersion      string
@@ -21,9 +22,8 @@ func ProjectTypes() []string {
 	return []string{"basic", "cli", "web", "library", "data-science"}
 }
 
-// ProjectStructures returns available project structures
-func ProjectStructures() []string {
-	return []string{"src", "direct"}
+func WebFrameworks() []string {
+	return []string{"fastapi", "flask", "django"}
 }
 
 // SanitizeProjectName converts the project name to a valid directory name
