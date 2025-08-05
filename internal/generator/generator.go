@@ -2,11 +2,12 @@ package generator
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/Pradyothsp/pyinit/internal/config"
 	"github.com/Pradyothsp/pyinit/internal/prompts"
 	"github.com/Pradyothsp/pyinit/pkg/template"
-	"os"
-	"path/filepath"
 )
 
 // Generator handles project generation
@@ -23,14 +24,24 @@ func New() *Generator {
 
 // GenerateProject creates the complete project structure
 func (g *Generator) GenerateProject(cfg *config.ProjectConfig) error {
+	// Common steps
+	if err := g.GenerateCommonProject(cfg); err != nil {
+		return fmt.Errorf("failed to create project: %w", err)
+	}
+
+	if cfg.ProjectType == "basic" {
+		if err := g.GeneratorBasicProject(cfg); err != nil {
+			return fmt.Errorf("failed to create basic project structure %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (g *Generator) GenerateCommonProject(cfg *config.ProjectConfig) error {
 	// Check and create a project directory
 	if err := g.createProjectDirectory(cfg); err != nil {
 		return fmt.Errorf("failed to create project directory: %w", err)
-	}
-
-	// Generate README.md
-	if err := g.generateFileFromTemplate(cfg, "README.md.j2", "README.md"); err != nil {
-		return fmt.Errorf("failed to generate README.md: %w", err)
 	}
 
 	// Create a scripts directory
@@ -39,8 +50,22 @@ func (g *Generator) GenerateProject(cfg *config.ProjectConfig) error {
 	}
 
 	// Generate .gitignore
-	if err := g.generateFileFromTemplate(cfg, ".gitignore.j2", ".gitignore"); err != nil {
+	if err := g.generateFileFromTemplate(cfg, "core/gitignore.j2", ".gitignore"); err != nil {
 		return fmt.Errorf("failed to generate .gitignore: %w", err)
+	}
+
+	// Generate .python-version
+	if err := g.generateFileFromTemplate(cfg, "core/python-version.j2", ".python-version"); err != nil {
+		return fmt.Errorf("failed to generate .python-version: %w", err)
+	}
+
+	return nil
+}
+
+func (g *Generator) GeneratorBasicProject(cfg *config.ProjectConfig) error {
+	// Generate README.md
+	if err := g.generateFileFromTemplate(cfg, "basic/README.md.j2", "README.md"); err != nil {
+		return fmt.Errorf("failed to generate README.md: %w", err)
 	}
 
 	// Create the main project structure
@@ -48,13 +73,8 @@ func (g *Generator) GenerateProject(cfg *config.ProjectConfig) error {
 		return fmt.Errorf("failed to create main project directory: %w", err)
 	}
 
-	// Generate .python-version
-	if err := g.generateFileFromTemplate(cfg, ".python-version.j2", ".python-version"); err != nil {
-		return fmt.Errorf("failed to generate .python-version: %w", err)
-	}
-
 	// Create pyproject.toml
-	if err := g.generateFileFromTemplate(cfg, "pyproject.toml.j2", "pyproject.toml"); err != nil {
+	if err := g.generateFileFromTemplate(cfg, "basic/pyproject.toml.j2", "pyproject.toml"); err != nil {
 		return fmt.Errorf("failed to generate pyproject.toml: %w", err)
 	}
 
@@ -68,27 +88,12 @@ func (g *Generator) createProjectDirectory(cfg *config.ProjectConfig) error {
 		return err
 	}
 	if !confirmed {
-		return fmt.Errorf("project creation cancelled")
+		return fmt.Errorf("project creation cancelled %w", err)
 	}
 
 	// Create the directory
 	if err := os.MkdirAll(cfg.ProjectPath, 0755); err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
-	}
-
-	return nil
-}
-
-func (g *Generator) generateFileFromTemplate(cfg *config.ProjectConfig, templateName, relativePath string) error {
-	outputPath := filepath.Join(cfg.ProjectPath, relativePath)
-
-	content, err := g.templateEngine.RenderTemplate(templateName, cfg.TemplateContext())
-	if err != nil {
-		return fmt.Errorf("failed to render %s template: %w", templateName, err)
-	}
-
-	if err := os.WriteFile(outputPath, []byte(content), 0644); err != nil {
-		return fmt.Errorf("failed to write %s: %w", relativePath, err)
 	}
 
 	return nil
@@ -107,12 +112,12 @@ func (g *Generator) createScriptsDirectory(cfg *config.ProjectConfig) error {
 	}
 
 	// Generate fmt.py
-	if err := g.generateFileFromTemplate(cfg, "fmt.py.j2", filepath.Join("scripts", "fmt.py")); err != nil {
+	if err := g.generateFileFromTemplate(cfg, "core/fmt.py.j2", filepath.Join("scripts", "fmt.py")); err != nil {
 		return fmt.Errorf("failed to generate fmt.py: %w", err)
 	}
 
 	// Generate fmt_check.py
-	if err := g.generateFileFromTemplate(cfg, "fmt_check.py.j2", filepath.Join("scripts", "fmt_check.py")); err != nil {
+	if err := g.generateFileFromTemplate(cfg, "core/fmt_check.py.j2", filepath.Join("scripts", "fmt_check.py")); err != nil {
 		return fmt.Errorf("failed to generate fmt_check.py: %w", err)
 	}
 
@@ -132,7 +137,7 @@ func (g *Generator) createMainDirectory(cfg *config.ProjectConfig) error {
 	}
 
 	// Generate main.py
-	if err := g.generateFileFromTemplate(cfg, "main.py.j2", filepath.Join(cfg.MainDirName, "main.py")); err != nil {
+	if err := g.generateFileFromTemplate(cfg, "basic/main.py.j2", filepath.Join(cfg.MainDirName, "main.py")); err != nil {
 		return fmt.Errorf("failed to generate main.py: %w", err)
 	}
 
