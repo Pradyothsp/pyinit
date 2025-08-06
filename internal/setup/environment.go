@@ -26,6 +26,30 @@ func DevDependencies(projectPath string) error {
 		return fmt.Errorf("failed to add development dependencies: %w", err)
 	}
 
+	// Run uv run fmt to format the code
+	fmt.Println("🎨 Formatting code...")
+	fmtCmd := exec.Command("uv", "run", "fmt")
+	fmtCmd.Dir = projectPath
+	fmtCmd.Stdout = os.Stdout
+	fmtCmd.Stderr = os.Stderr
+
+	if err := fmtCmd.Run(); err != nil {
+		fmt.Printf("Warning: Failed to run formatter: %v\n", err)
+		// Don't return error, continue with setup
+	}
+
+	// Run uv run fmt-check to check formatting
+	fmt.Println("🔍 Checking code formatting...")
+	fmtCheckCmd := exec.Command("uv", "run", "fmt-check")
+	fmtCheckCmd.Dir = projectPath
+	fmtCheckCmd.Stdout = os.Stdout
+	fmtCheckCmd.Stderr = os.Stderr
+
+	if err := fmtCheckCmd.Run(); err != nil {
+		fmt.Printf("Warning: Format check failed: %v\n", err)
+		// Don't return error, continue with setup
+	}
+
 	fmt.Println("✅ Development environment setup complete!")
 	return nil
 }
@@ -44,6 +68,8 @@ func ShowManualInstructions(projectPath string) {
 	fmt.Println("💡 You can set up the development environment later by running:")
 	fmt.Println("   cd", projectPath)
 	fmt.Println("   uv add --dev ruff pyright")
+	fmt.Println("   uv run fmt")
+	fmt.Println("   uv run fmt-check")
 }
 
 // FastAPIDependencies installs selected FastAPI dependencies using uv
