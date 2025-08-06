@@ -16,8 +16,8 @@ pyinit is built with a hybrid architecture:
 ### Prerequisites
 
 - **Go 1.24+**
-- **Python 3.9+**
-- **Node.js** (for Python package tooling)
+- **Python 3.9+** 
+- **uv** (recommended for Python package development)
 
 ### Local Development
 
@@ -30,6 +30,11 @@ pyinit is built with a hybrid architecture:
 2. **Set up Go development**
    ```bash
    go mod download
+   
+   # Build with version info (recommended)
+   make build
+   
+   # Or build directly
    go build -o pyinit ./cmd/pyinit
    ```
 
@@ -37,6 +42,9 @@ pyinit is built with a hybrid architecture:
    ```bash
    cd python-package
    pip install -e .
+   
+   # Or with uv (recommended)
+   uv sync
    ```
 
 4. **Test your changes**

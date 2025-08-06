@@ -23,16 +23,16 @@ pyinit
 
 The tool will guide you through creating a new Python project with:
 
-- **Interactive Setup**: Guides you through creating a new Python project
-- **Customizable Project Structure**: Choose between `src` layout or direct layout
-- **Project Types**: Supports different project types like `cli`, `web`, `library`, `data-science`
-- **Automated Environment Setup**: Automatically creates virtual environment and installs dependencies
+- **Interactive Setup**: Guides you through project creation with sensible defaults
+- **Multiple Project Types**: Support for basic Python projects and web frameworks (FastAPI)
+- **Smart Dependency Management**: Interactive selection of libraries with automatic installation
+- **Automated Environment Setup**: Automatically installs dependencies using `uv`
 - **Pre-configured Tools**: Comes with pre-configured tools for formatting and linting (`ruff`, `pyright`)
 
 ## Requirements
 
 - Python 3.9+
-- macOS or Linux
+- macOS, Linux, or Windows
 
 ## How it Works
 

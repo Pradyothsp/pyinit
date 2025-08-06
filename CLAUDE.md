@@ -14,8 +14,14 @@ pyinit is a hybrid architecture CLI tool for Python project scaffolding:
 
 ### Go Development
 ```bash
-# Build the Go binary
+# Build the Go binary with version info (recommended)
+make build
+
+# Build without version info
 go build -o pyinit ./cmd/pyinit
+
+# Build for all platforms
+make build-all
 
 # Run tests
 go test ./...
@@ -67,6 +73,9 @@ git push origin v0.1.0
 - `config.go`: Configuration management (`~/.pyinitrc`)
 - `banner.go`: CLI banner display
 
+**Version Management** (`internal/version/`):
+- `version.go`: Dynamic version information with build-time ldflags support
+
 **Project Generation** (`internal/generator/`):
 - `generator.go`: Main project generation logic with type-specific handlers
 - `utils.go`: File generation utilities
@@ -82,7 +91,7 @@ git push origin v0.1.0
 ### Template Structure
 - `templates/core/`: Common files (gitignore, python-version, format scripts)
 - `templates/basic/`: Basic Python project templates
-- `templates/web/`: Web framework templates (FastAPI planned)
+- `templates/web/`: Web framework templates (FastAPI implemented)
 
 ### Python Wrapper
 - `python-package/pyinit_cli/`: Core Python CLI wrapper
