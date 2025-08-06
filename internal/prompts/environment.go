@@ -20,3 +20,32 @@ func AskForEnvironmentSetup() (bool, error) {
 
 	return setupEnv, nil
 }
+
+// AskForFastAPIDependencies prompts the user to select FastAPI dependencies they want to install
+func AskForFastAPIDependencies() ([]string, error) {
+	var selectedDeps []string
+	
+	availableDeps := []string{
+		"fastapi",
+		"uvicorn[standard]",
+		"sqlalchemy",
+		"pydantic-settings",
+		"python-jose[cryptography]",
+		"passlib[bcrypt]",
+		"alembic",
+		"httpx", // for testing
+	}
+
+	prompt := &survey.MultiSelect{
+		Message: "Select FastAPI dependencies to install:",
+		Options: availableDeps,
+		Default: []string{"fastapi", "uvicorn[standard]"}, // Core dependencies selected by default
+		Help:    "Use space to select/deselect, Enter to confirm",
+	}
+
+	if err := survey.AskOne(prompt, &selectedDeps); err != nil {
+		return nil, fmt.Errorf("failed to get FastAPI dependencies selection: %w", err)
+	}
+
+	return selectedDeps, nil
+}

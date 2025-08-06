@@ -1,0 +1,61 @@
+"""FastAPI application for {{ project_name }}."""
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from {{ main_dir_name }}.api.routes import router
+from {{ main_dir_name }}.core.config import settings
+
+
+def create_app() -> FastAPI:
+    """Create and configure the FastAPI application."""
+    app = FastAPI(
+        title=settings.app_name,
+        description=settings.app_description,
+        version=settings.app_version,
+        docs_url="/docs",
+        redoc_url="/redoc",
+    )
+
+    # Add CORS middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=True,
+        allow_methods=settings.cors_methods,
+        allow_headers=settings.cors_headers,
+    )
+
+    # Include API routes
+    app.include_router(router, prefix="/api/v1")
+    
+    # Add root endpoint
+    @app.get("/")
+    async def root() -> dict[str, str]:
+        """Root endpoint."""
+        return {
+            "message": f"Welcome to {settings.app_name}",
+            "docs": "/docs",
+            "version": settings.app_version,
+        }
+
+    return app
+
+
+# Create application instance
+app = create_app()
+
+
+def run_server() -> None:
+    """Run the development server."""
+    import uvicorn
+    uvicorn.run(
+        "{{ main_dir_name }}.main:app",
+        host=settings.host,
+        port=settings.port,
+        reload=settings.reload,
+    )
+
+
+if __name__ == "__main__":
+    run_server()

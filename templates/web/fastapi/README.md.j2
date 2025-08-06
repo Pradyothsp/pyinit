@@ -1,0 +1,122 @@
+# {{ project_name }}
+
+{{ project_description }}
+
+A FastAPI-based web API built with modern Python development tools.
+
+## ✨ Features
+
+- **FastAPI** - Modern, fast web framework for building APIs
+- **Async Support** - Built-in support for asynchronous operations
+- **Auto Documentation** - Interactive API docs with Swagger UI and ReDoc
+- **Type Safety** - Full type hints and validation with Pydantic
+- **Development Tools** - Pre-configured with ruff, pyright, and pytest
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python {{ python_version }}+
+- [uv](https://docs.astral.sh/uv/) (recommended) or pip
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd {{ project_name }}
+
+# Install dependencies
+uv sync
+
+# Or with pip
+pip install -e .
+```
+
+### Running the Application
+
+```bash
+# Development server with hot reload
+uv run uvicorn {{ main_dir_name }}.main:app --reload
+
+# Or using the custom serve command
+uv run serve
+
+# Production server
+uv run uvicorn {{ main_dir_name }}.main:app --host 0.0.0.0 --port 8000
+```
+
+The API will be available at:
+- **Application**: http://localhost:8000
+- **Interactive Docs**: http://localhost:8000/docs
+- **Alternative Docs**: http://localhost:8000/redoc
+
+## 📁 Project Structure
+
+```
+{{ project_name }}/
+├── {{ main_dir_name }}/     # Main application package
+│   ├── __init__.py
+│   ├── main.py              # FastAPI application
+│   ├── api/                 # API routes
+│   ├── core/                # Core configuration
+│   ├── models/              # Database models (future)
+│   └── schemas/             # Pydantic schemas (future)
+├── tests/                   # Test suite
+├── scripts/                 # Development scripts
+└── pyproject.toml          # Project configuration
+```
+
+## 🔧 Development Commands
+
+```bash
+# Format code
+uv run fmt
+
+# Lint and type check
+uv run fmt-check
+
+# Run tests
+uv run pytest
+
+# Run tests with coverage
+uv run pytest --cov={{ main_dir_name }}
+```
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run with coverage
+uv run pytest --cov={{ main_dir_name }} --cov-report=html
+
+# Run specific test file
+uv run pytest tests/test_main.py
+```
+
+## 📚 API Endpoints
+
+- `GET /` - Hello World endpoint
+- `GET /health` - Health check endpoint
+- `GET /docs` - Interactive API documentation (Swagger UI)
+- `GET /redoc` - Alternative API documentation
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests and linting (`uv run fmt-check && uv run pytest`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+**Built with ❤️ using FastAPI and modern Python tooling.**

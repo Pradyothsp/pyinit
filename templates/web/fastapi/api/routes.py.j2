@@ -1,0 +1,24 @@
+"""API routes for {{ project_name }}."""
+
+from fastapi import APIRouter
+
+# Create the main router
+router = APIRouter()
+
+
+@router.get("/")
+async def hello_world() -> dict[str, str]:
+    """Hello World endpoint."""
+    return {"message": "Hello, World from {{ project_name }}!"}
+
+
+@router.get("/health")
+async def health_check() -> dict[str, str]:
+    """Health check endpoint."""
+    return {"status": "healthy", "service": "{{ project_name }}"}
+
+
+@router.get("/version")
+async def get_version() -> dict[str, str]:
+    """Get application version."""
+    return {"version": "0.1.0", "service": "{{ project_name }}"}

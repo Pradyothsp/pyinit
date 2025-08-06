@@ -44,13 +44,17 @@ func SanitizeProjectName(name string) string {
 
 // TemplateContext returns a map for template rendering
 func (pc *ProjectConfig) TemplateContext() map[string]interface{} {
+	// Create ruff-compatible Python version (e.g., "3.13" -> "py313")
+	pythonVersionForRuff := "py" + strings.ReplaceAll(pc.PythonVersion, ".", "")
+	
 	return map[string]interface{}{
-		"project_name":        pc.ProjectName,
-		"project_type":        pc.ProjectType,
-		"project_description": pc.ProjectDescription,
-		"user_name":           pc.UserName,
-		"email":               pc.Email,
-		"main_dir_name":       pc.MainDirName,
-		"python_version":      pc.PythonVersion,
+		"project_name":              pc.ProjectName,
+		"project_type":              pc.ProjectType,
+		"project_description":       pc.ProjectDescription,
+		"user_name":                 pc.UserName,
+		"email":                     pc.Email,
+		"main_dir_name":             pc.MainDirName,
+		"python_version":            pc.PythonVersion,
+		"python_version_for_ruff":   pythonVersionForRuff,
 	}
 }

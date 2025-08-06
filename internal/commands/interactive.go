@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/Pradyothsp/pyinit/internal/config"
 	"github.com/Pradyothsp/pyinit/internal/generator"
 	"github.com/Pradyothsp/pyinit/internal/prompts"
 	"github.com/Pradyothsp/pyinit/internal/setup"
@@ -33,6 +34,11 @@ func (c *Commands) runInteractive(cmd *cobra.Command, args []string) {
 
 	fmt.Printf("✅ Project '%s' created successfully at: %s\n", cfg.ProjectName, cfg.ProjectPath)
 
+	// Handle FastAPI dependencies setup (only for FastAPI projects)
+	if err := c.handleFastAPIDependencies(cfg); err != nil {
+		fmt.Printf("Warning: Failed to setup FastAPI dependencies: %v\n", err)
+	}
+
 	// Handle environment setup
 	if err := c.handleEnvironmentSetup(cfg.ProjectPath); err != nil {
 		fmt.Printf("Warning: Failed to setup environment: %v\n", err)
@@ -50,6 +56,28 @@ func (c *Commands) showBannerIfEnabled() error {
 
 	banner.Show()
 	return nil
+}
+
+// handleFastAPIDependencies manages FastAPI dependency installation
+func (c *Commands) handleFastAPIDependencies(cfg *config.ProjectConfig) error {
+	// Only handle FastAPI dependencies for FastAPI projects
+	if cfg.ProjectType != "web" || cfg.WebFramework != "fastapi" {
+		return nil
+	}
+
+	// Ask user to select FastAPI dependencies
+	selectedDeps, err := prompts.AskForFastAPIDependencies()
+	if err != nil {
+		return fmt.Errorf("failed to prompt for FastAPI dependencies: %w", err)
+	}
+
+	if len(selectedDeps) == 0 {
+		fmt.Println("No dependencies selected, skipping installation.")
+		return nil
+	}
+
+	// Install selected dependencies
+	return setup.FastAPIDependencies(cfg.ProjectPath, selectedDeps)
 }
 
 // handleEnvironmentSetup manages the development environment setup

@@ -45,3 +45,54 @@ func ShowManualInstructions(projectPath string) {
 	fmt.Println("   cd", projectPath)
 	fmt.Println("   uv add --dev ruff pyright")
 }
+
+// FastAPIDependencies installs selected FastAPI dependencies using uv
+func FastAPIDependencies(projectPath string, selectedDeps []string) error {
+	fmt.Println("🚀 Installing FastAPI dependencies...")
+
+	// Check if uv is installed
+	if err := checkUvInstalled(); err != nil {
+		ShowManualFastAPIInstructions(projectPath, selectedDeps)
+		return err
+	}
+
+	// Install selected dependencies
+	if len(selectedDeps) > 0 {
+		args := append([]string{"add"}, selectedDeps...)
+		cmd := exec.Command("uv", args...)
+		cmd.Dir = projectPath
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("failed to add FastAPI dependencies: %w", err)
+		}
+	}
+
+	// Sync dependencies including dev dependencies
+	syncCmd := exec.Command("uv", "sync", "--dev")
+	syncCmd.Dir = projectPath
+	syncCmd.Stdout = os.Stdout
+	syncCmd.Stderr = os.Stderr
+
+	if err := syncCmd.Run(); err != nil {
+		return fmt.Errorf("failed to sync dependencies: %w", err)
+	}
+
+	fmt.Println("✅ FastAPI dependencies installed successfully!")
+	return nil
+}
+
+// ShowManualFastAPIInstructions displays instructions for manual FastAPI dependency setup
+func ShowManualFastAPIInstructions(projectPath string, selectedDeps []string) {
+	fmt.Println("💡 You can install FastAPI dependencies later by running:")
+	fmt.Println("   cd", projectPath)
+	if len(selectedDeps) > 0 {
+		fmt.Printf("   uv add")
+		for _, dep := range selectedDeps {
+			fmt.Printf(" %s", dep)
+		}
+		fmt.Println()
+	}
+	fmt.Println("   uv sync --dev")
+}

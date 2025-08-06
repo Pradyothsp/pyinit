@@ -1,0 +1,31 @@
+"""Application configuration for {{ project_name }}."""
+
+from pydantic import BaseSettings
+
+
+class Settings(BaseSettings):
+    """Application settings."""
+    
+    # Application
+    app_name: str = "{{ project_name }}"
+    app_description: str = "{{ project_description }}"
+    app_version: str = "0.1.0"
+    
+    # Server
+    host: str = "0.0.0.0"
+    port: int = 8000
+    reload: bool = True
+    
+    # CORS
+    cors_origins: list[str] = ["*"]
+    cors_methods: list[str] = ["*"]
+    cors_headers: list[str] = ["*"]
+    
+    class Config:
+        """Pydantic config."""
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
+
+# Global settings instance
+settings = Settings()

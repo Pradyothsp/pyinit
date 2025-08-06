@@ -1,0 +1,105 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{ project_name }}"
+version = "0.1.0"
+description = "{{ project_description }}"
+readme = "README.md"
+requires-python = ">={{ python_version }}"
+authors = [
+    {name = "{{ user_name }}", email = "{{ email }}"}
+]
+keywords = ["fastapi", "api", "web"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: {{ python_version }}",
+    "Framework :: FastAPI",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+]
+
+dependencies = []
+
+[dependency-groups]
+dev = []
+
+[tool.uv]
+package = true
+
+[project.scripts]
+serve = "{{ main_dir_name }}.main:run_server"
+fmt = "scripts.fmt:main"
+fmt-check = "scripts.fmt_check:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["{{ main_dir_name }}*", "scripts"]
+
+[tool.pyright]
+include = ["{{ main_dir_name }}", "scripts", "tests"]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "{{ python_version }}"
+typeCheckingMode = "strict"
+reportMissingImports = true
+useLibraryCodeForTypes = true
+
+[tool.ruff]
+line-length = 88
+target-version = "{{ python_version_for_ruff }}"
+
+fix = true
+unsafe-fixes = false
+
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+    "migrations",
+]
+
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle errors
+    "F", # pyflakes
+    "UP", # pyupgrade
+    "B", # flake8-bugbear
+    "SIM", # flake8-simplify
+    "I", # isort
+    "RUF", # Ruff-specific rules
+    "C90", # McCabe complexity
+]
+
+ignore = [
+    "E501", # Line too long (handled by formatter)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

@@ -1,0 +1,55 @@
+"""Tests for {{ project_name }} FastAPI application."""
+
+import pytest
+from fastapi.testclient import TestClient
+
+from {{ main_dir_name }}.main import app
+
+client = TestClient(app)
+
+
+def test_root_endpoint():
+    """Test the root endpoint."""
+    response = client.get("/")
+    assert response.status_code == 200
+    data = response.json()
+    assert "message" in data
+    assert "docs" in data
+    assert "version" in data
+
+
+def test_hello_world():
+    """Test the hello world API endpoint."""
+    response = client.get("/api/v1/")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["message"] == "Hello, World from {{ project_name }}!"
+
+
+def test_health_check():
+    """Test the health check endpoint."""
+    response = client.get("/api/v1/health")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert data["service"] == "{{ project_name }}"
+
+
+def test_version_endpoint():
+    """Test the version endpoint."""
+    response = client.get("/api/v1/version")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["version"] == "0.1.0"
+    assert data["service"] == "{{ project_name }}"
+
+
+def test_docs_endpoints():
+    """Test that documentation endpoints are accessible."""
+    # Test Swagger UI
+    response = client.get("/docs")
+    assert response.status_code == 200
+    
+    # Test ReDoc
+    response = client.get("/redoc")
+    assert response.status_code == 200
