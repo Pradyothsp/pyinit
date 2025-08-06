@@ -30,6 +30,9 @@ func (c *Commands) setupRootCommand() {
 		Long:  "An interactive CLI tool to create Python project scaffolds with customizable structure",
 		Run:   c.runInteractive,
 	}
+	
+	// Add version flag
+	c.rootCmd.Flags().BoolP("version", "v", false, "Show version information")
 }
 
 // setupConfigCommands adds all config-related commands

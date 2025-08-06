@@ -7,12 +7,20 @@ import (
 	"github.com/Pradyothsp/pyinit/internal/generator"
 	"github.com/Pradyothsp/pyinit/internal/prompts"
 	"github.com/Pradyothsp/pyinit/internal/setup"
+	"github.com/Pradyothsp/pyinit/internal/version"
 	"github.com/Pradyothsp/pyinit/pkg/ui"
 	"github.com/spf13/cobra"
 )
 
 // runInteractive handles the main interactive project creation
 func (c *Commands) runInteractive(cmd *cobra.Command, args []string) {
+	// Check for version flag
+	if versionFlag, _ := cmd.Flags().GetBool("version"); versionFlag {
+		buildInfo := version.GetBuildInfo()
+		fmt.Println(buildInfo.String())
+		return
+	}
+
 	// Show banner if enabled
 	if err := c.showBannerIfEnabled(); err != nil {
 		fmt.Printf("Warning: Banner display failed: %v\n", err)

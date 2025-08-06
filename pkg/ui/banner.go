@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"github.com/Pradyothsp/pyinit/internal/version"
 )
 
 // Banner handles ASCII banner display
@@ -48,9 +49,9 @@ func (b *Banner) generateBanner() string {
 `
 
 	tagline := "🚀 Interactive Python Project Scaffolding Tool"
-	version := "v0.0.2" // TODO: Make this dynamic later
+	versionInfo := version.GetVersion()
 
-	return fmt.Sprintf("%s\n%s\n%s\n\n", asciiArt, tagline, version)
+	return fmt.Sprintf("%s\n%s\n%s\n\n", asciiArt, tagline, versionInfo)
 }
 
 // IsEnabled returns whether the banner is enabled

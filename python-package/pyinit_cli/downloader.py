@@ -26,6 +26,11 @@ def get_platform_info() -> str:
             return "linux-amd64"
         else:
             raise RuntimeError(f"Unsupported Linux architecture: {machine}")
+    elif system == "windows":
+        if machine in ("x86_64", "amd64"):
+            return "windows-amd64"
+        else:
+            raise RuntimeError(f"Unsupported Windows architecture: {machine}")
     else:
         raise RuntimeError(f"Unsupported operating system: {system}")
 
@@ -40,16 +45,21 @@ def get_binary_info() -> tuple[str, str | None]:
         # Checksums will be added here automatically during the release process
     }
 
+    # Determine binary filename (Windows needs .exe extension)
+    binary_filename = f"pyinit-{platform_name}"
+    if platform_name.startswith("windows"):
+        binary_filename += ".exe"
+
     if __version__ not in checksums:
         # For any version not in checksums (including development),
         # return None for checksum to skip verification
-        url = f"https://github.com/Pradyothsp/pyinit/releases/download/v0.0.3/pyinit-{platform_name}"
+        url = f"https://github.com/Pradyothsp/pyinit/releases/download/v0.0.3/{binary_filename}"
         return url, None
 
     if platform_name not in checksums[__version__]:
         raise RuntimeError(f"No binary available for platform: {platform_name}")
 
-    url = f"https://github.com/Pradyothsp/pyinit/releases/download/{version}/pyinit-{platform_name}"
+    url = f"https://github.com/Pradyothsp/pyinit/releases/download/{version}/{binary_filename}"
     expected_sha: str = checksums[__version__][platform_name]
 
     return url, expected_sha
@@ -60,7 +70,14 @@ def get_binary_path() -> Path:
     home = Path.home()
     binary_dir = home / ".pyinit" / "bin"
     binary_dir.mkdir(parents=True, exist_ok=True)
-    return binary_dir / "pyinit"
+
+    # Windows binaries need .exe extension
+    platform_name = get_platform_info()
+    binary_name = "pyinit"
+    if platform_name.startswith("windows"):
+        binary_name += ".exe"
+
+    return binary_dir / binary_name
 
 
 def verify_checksum(file_path: Path, expected_sha: str) -> bool:

@@ -32,11 +32,29 @@ jobs:
         with:
           go-version: '1.24'
 
-      - name: Build binaries
+      - name: Create dist directory
+        run: mkdir -p dist
+
+      - name: Build binaries with version info
         run: |
-          GOOS=darwin GOARCH=amd64 go build -o pyinit-darwin-amd64 ./cmd/pyinit
-          GOOS=darwin GOARCH=arm64 go build -o pyinit-darwin-arm64 ./cmd/pyinit
-          GOOS=linux GOARCH=amd64 go build -o pyinit-linux-amd64 ./cmd/pyinit
+          # Extract version from tag (remove 'v' prefix for internal use, keep for git tag)
+          VERSION=$(echo ${GITHUB_REF} | sed 's/refs\/tags\///')
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          BUILD_DATE=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          
+          echo "Building with:"
+          echo "  Version: $VERSION"
+          echo "  Commit: $GIT_COMMIT"
+          echo "  Build Date: $BUILD_DATE"
+          
+          # Build with ldflags to embed version information
+          GOOS=darwin GOARCH=amd64 go build -ldflags "-X github.com/Pradyothsp/pyinit/internal/version.Version=$VERSION -X github.com/Pradyothsp/pyinit/internal/version.GitCommit=$GIT_COMMIT -X 'github.com/Pradyothsp/pyinit/internal/version.BuildDate=$BUILD_DATE'" -o dist/pyinit-darwin-amd64 ./cmd/pyinit
+          GOOS=darwin GOARCH=arm64 go build -ldflags "-X github.com/Pradyothsp/pyinit/internal/version.Version=$VERSION -X github.com/Pradyothsp/pyinit/internal/version.GitCommit=$GIT_COMMIT -X 'github.com/Pradyothsp/pyinit/internal/version.BuildDate=$BUILD_DATE'" -o dist/pyinit-darwin-arm64 ./cmd/pyinit
+          GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/Pradyothsp/pyinit/internal/version.Version=$VERSION -X github.com/Pradyothsp/pyinit/internal/version.GitCommit=$GIT_COMMIT -X 'github.com/Pradyothsp/pyinit/internal/version.BuildDate=$BUILD_DATE'" -o dist/pyinit-linux-amd64 ./cmd/pyinit
+          GOOS=windows GOARCH=amd64 go build -ldflags "-X github.com/Pradyothsp/pyinit/internal/version.Version=$VERSION -X github.com/Pradyothsp/pyinit/internal/version.GitCommit=$GIT_COMMIT -X 'github.com/Pradyothsp/pyinit/internal/version.BuildDate=$BUILD_DATE'" -o dist/pyinit-windows-amd64.exe ./cmd/pyinit
+          
+          # Copy binaries to root for backwards compatibility with release step
+          cp dist/* ./
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -47,6 +65,7 @@ jobs:
             pyinit-darwin-amd64
             pyinit-darwin-arm64
             pyinit-linux-amd64
+            pyinit-windows-amd64.exe
 
   publish-python-package:
     needs: build-and-release
@@ -72,24 +91,28 @@ jobs:
           curl -L -f -o pyinit-darwin-amd64 "https://github.com/Pradyothsp/pyinit/releases/download/v$VERSION/pyinit-darwin-amd64"
           curl -L -f -o pyinit-darwin-arm64 "https://github.com/Pradyothsp/pyinit/releases/download/v$VERSION/pyinit-darwin-arm64"
           curl -L -f -o pyinit-linux-amd64 "https://github.com/Pradyothsp/pyinit/releases/download/v$VERSION/pyinit-linux-amd64"
+          curl -L -f -o pyinit-windows-amd64.exe "https://github.com/Pradyothsp/pyinit/releases/download/v$VERSION/pyinit-windows-amd64.exe"
           
           # Calculate checksums
           DARWIN_AMD64_SHA=$(sha256sum pyinit-darwin-amd64 | cut -d' ' -f1)
           DARWIN_ARM64_SHA=$(sha256sum pyinit-darwin-arm64 | cut -d' ' -f1)
           LINUX_AMD64_SHA=$(sha256sum pyinit-linux-amd64 | cut -d' ' -f1)
+          WINDOWS_AMD64_SHA=$(sha256sum pyinit-windows-amd64.exe | cut -d' ' -f1)
           
           echo "Checksums:"
-          echo "  Darwin AMD64: $DARWIN_AMD64_SHA"
-          echo "  Darwin ARM64: $DARWIN_ARM64_SHA"
-          echo "  Linux AMD64:  $LINUX_AMD64_SHA"
+          echo "  Darwin AMD64:  $DARWIN_AMD64_SHA"
+          echo "  Darwin ARM64:  $DARWIN_ARM64_SHA"
+          echo "  Linux AMD64:   $LINUX_AMD64_SHA"
+          echo "  Windows AMD64: $WINDOWS_AMD64_SHA"
           
           # Update downloader.py with new checksums using awk
-          awk -v version="$VERSION" -v amd64="$DARWIN_AMD64_SHA" -v arm64="$DARWIN_ARM64_SHA" -v linux="$LINUX_AMD64_SHA" '
+          awk -v version="$VERSION" -v amd64="$DARWIN_AMD64_SHA" -v arm64="$DARWIN_ARM64_SHA" -v linux="$LINUX_AMD64_SHA" -v windows="$WINDOWS_AMD64_SHA" '
           /^    }$/ && !added {
               printf "        \"%s\": {\n", version
               printf "            \"darwin-amd64\": \"%s\",\n", amd64
               printf "            \"darwin-arm64\": \"%s\",\n", arm64
               printf "            \"linux-amd64\": \"%s\",\n", linux
+              printf "            \"windows-amd64\": \"%s\",\n", windows
               printf "        },\n"
               added = 1
           }
