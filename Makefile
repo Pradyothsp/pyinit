@@ -1,4 +1,4 @@
-.PHONY: build build-all clean test help
+.PHONY: build build-all clean test test-verbose test-pretty test-dots clean help
 
 # Get version from git tag, fallback to 'dev'
 VERSION ?= $(shell git describe --tags --exact-match 2>/dev/null || echo "dev")
@@ -29,6 +29,17 @@ dist:
 # Test
 test: ## Run tests
 	go test ./...
+
+test-verbose: ## Run tests with verbose output
+	go test -v ./...
+
+test-pretty: ## Run tests with pretty formatting (requires gotestsum)
+	@command -v gotestsum >/dev/null 2>&1 || { echo >&2 "gotestsum is required but not installed. Run: go install gotest.tools/gotestsum@latest"; exit 1; }
+	gotestsum --format testname ./...
+
+test-dots: ## Run tests with pretty formatting (requires gotestsum)
+	@command -v gotestsum >/dev/null 2>&1 || { echo >&2 "gotestsum is required but not installed. Run: go install gotest.tools/gotestsum@latest"; exit 1; }
+	gotestsum --format dots ./...
 
 # Clean
 clean: ## Clean build artifacts
